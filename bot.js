@@ -9,6 +9,15 @@ let counter = 0;
 let tweetsDone;
 let tweets_Done = {};
 
+const isPrime = num => {
+  	for (let i = 2; i < num; i++) {
+    		if(num % i === 0) {
+			return false;
+		}
+	}
+  	return num > 1;
+}
+
 const writeParamsFile = async () => {
 
 	try {
@@ -23,7 +32,7 @@ const writeParamsFile = async () => {
 
 			} else {
 
-				console.error(`${fineName} is accessible!!`);
+				console.log(`${fineName} is accessible!!`);
 				
 				fs.writeFileSync(paramsPath, JSON.stringify(tweets_Done));
 			}
@@ -44,20 +53,22 @@ const readParams = () => {
 		return JSON.parse(data.toString());
 
 	} catch (error) {
-		console.log('Error happened on readParams: ', error);
+		console.error('Error happened on readParams: ', error);
 	}
 }
 
 const getTweets = (since_id) => {
         return new Promise((resolve, reject) => {
 
+		const is_prime = isPrime(counter);
+
                 let params1 = {
-                        q: ['#100DaysOfCode', '#javascript'],
+                        q: is_prime ? ['#100DaysOfCode', '#javascript'] : ["#Math", "#Statistics"],
                         count: 10,
                 };
 
 		let params2 = {
-                        q: ['#programming', '#coding'],
+                        q: !is_prime ? ['#programming', '#coding'] : ["#digitalart", "#porlalunaart"],
                         count: 10,
                 };
 
@@ -151,13 +162,19 @@ const runBot = async () => {
 
 					console.log('-- Successful retweet - ID: [ ' + tweet.id_str + ' ] ');
 
+					tweets_Done = {...tweets_Done, ...{ [tweet.id_str]: true }};
 				}
+
         
                         } catch (err) {
         
 				if (!/You have already retweeted this Tweet./.test(err.message)) {
 
-	                                console.log('-- Unsuccessful retweet - ID: [' + tweet.id_str + ' ] ', err);
+	                                console.error('-- Unsuccessful retweet - ID: [' + tweet.id_str + ' ] ', err.message ? err.message : err);
+
+				} else {
+
+					tweets_Done = {...tweets_Done, ...{ [tweet.id_str]: false }};
 
 				}
         
@@ -169,18 +186,23 @@ const runBot = async () => {
 					await postTweetLike(tweet.id_str);
 
 					console.log('-- Successful Liked - ID: [ ' + tweet.id_str + ' ] ');
+
+					tweets_Done = {...tweets_Done, ...{ [tweet.id_str]: true }};
 				}
+
 	
 			} catch(err) {
 
 				if (!/You have already favorited this status/.test(err.message)) {
 
-					console.log('-- Unsuccessful Like - ID: [' + tweet.id_str + ' ] ', err);
+					console.error('-- Unsuccessful Like - ID: [' + tweet.id_str + ' ] ', err.message ? err.message : err);
+				} else {
+
+					tweets_Done = {...tweets_Done, ...{ [tweet.id_str]: false }};
+
 				}
 
 			}
-
-			tweets_Done = {...tweets_Done, ...{ [tweet.id_str]: true }};
 
                 }
 
