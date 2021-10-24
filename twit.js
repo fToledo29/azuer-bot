@@ -1,11 +1,12 @@
 
 const twit = require("twit");
-
-const Tw = new twit({
-        consumer_key: process.env.TWITTER_API_KEY,
-        consumer_secret: process.env.TWITTER_API_SECRET,
-        access_token: process.env.TWITTER_ACCESS_TOKEN,
-        access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
-});
+let config  = {twitter: {}};
+config.twitter = {
+	consumer_key: process.env.TWITTER_API_KEY,
+	consumer_secret: process.env.TWITTER_API_SECRET,
+	access_token: process.env.TWITTER_ACCESS_TOKEN,
+	access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
+};
+const Tw = new twit(config.twitter);
 
 module.exports = Tw;
